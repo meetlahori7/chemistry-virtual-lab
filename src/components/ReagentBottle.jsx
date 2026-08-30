@@ -1,26 +1,51 @@
-import React, { useState } from 'react'
+import React, { useState, useRef } from 'react'
+import { useFrame } from '@react-three/fiber'
 import { Text } from '@react-three/drei'
 import * as THREE from 'three'
+import { soundManager } from '../core/SoundEngine'
 
 export default function ReagentBottle({
   position = [0, 0, 0],
+  targetPourPos = [0, 1.2, 0],
   formula = 'HCl',
   name = 'Hydrochloric Acid',
   concentration = '0.1 M',
   color = '#f8fafc',
   isAmber = false,
+  isCurrentlyPouring = false,
   onClick,
   ...props
 }) {
   const [hovered, setHovered] = useState(false)
+  const groupRef = useRef()
+  const currentPos = useRef(new THREE.Vector3(...position))
+  const currentRot = useRef(new THREE.Euler(0, 0, 0))
+
+  useFrame((state, delta) => {
+    if (!groupRef.current) return
+
+    if (isCurrentlyPouring) {
+      // Lift up and tilt over beaker
+      groupRef.current.position.lerp(new THREE.Vector3(targetPourPos[0] - 0.7, targetPourPos[1], targetPourPos[2]), delta * 6)
+      groupRef.current.rotation.z = THREE.MathUtils.lerp(groupRef.current.rotation.z, -Math.PI / 3.2, delta * 6)
+      groupRef.current.rotation.y = THREE.MathUtils.lerp(groupRef.current.rotation.y, 0.4, delta * 6)
+    } else {
+      // Return to original bench position
+      groupRef.current.position.lerp(new THREE.Vector3(...position), delta * 6)
+      groupRef.current.rotation.z = THREE.MathUtils.lerp(groupRef.current.rotation.z, 0, delta * 6)
+      groupRef.current.rotation.y = THREE.MathUtils.lerp(groupRef.current.rotation.y, 0, delta * 6)
+    }
+  })
 
   return (
     <group
+      ref={groupRef}
       position={position}
-      scale={hovered ? 1.05 : 1.0}
+      scale={hovered ? 1.08 : 1.0}
       onPointerOver={(e) => {
         e.stopPropagation()
         setHovered(true)
+        soundManager.playGlassClink()
       }}
       onPointerOut={() => setHovered(false)}
       onClick={(e) => {
@@ -97,7 +122,6 @@ export default function ReagentBottle({
           <planeGeometry args={[0.42, 0.52]} />
           <meshStandardMaterial color="#f8fafc" roughness={0.7} />
         </mesh>
-        {/* Label Header */}
         <mesh position={[0, 0.18, 0.005]}>
           <planeGeometry args={[0.38, 0.08]} />
           <meshBasicMaterial color={isAmber ? '#ea580c' : '#0284c7'} />
@@ -112,7 +136,6 @@ export default function ReagentBottle({
         >
           REAGENT
         </Text>
-        {/* Chemical Formula */}
         <Text
           position={[0, 0.04, 0.01]}
           fontSize={0.08}
@@ -123,7 +146,6 @@ export default function ReagentBottle({
         >
           {formula}
         </Text>
-        {/* Chemical Name */}
         <Text
           position={[0, -0.08, 0.01]}
           fontSize={0.035}
@@ -133,7 +155,6 @@ export default function ReagentBottle({
         >
           {name}
         </Text>
-        {/* Concentration */}
         <Text
           position={[0, -0.16, 0.01]}
           fontSize={0.038}
@@ -144,6 +165,26 @@ export default function ReagentBottle({
           {concentration}
         </Text>
       </group>
+
+      {/* In-World 3D Hover Tooltip */}
+      {hovered && (
+        <group position={[0, 1.6, 0]}>
+          <mesh>
+            <planeGeometry args={[0.9, 0.22]} />
+            <meshBasicMaterial color="#0f172a" transparent opacity={0.9} />
+          </mesh>
+          <Text
+            position={[0, 0, 0.01]}
+            fontSize={0.065}
+            color="#38bdf8"
+            anchorX="center"
+            anchorY="middle"
+            fontWeight="bold"
+          >
+            {`CLICK TO POUR ${formula}`}
+          </Text>
+        </group>
+      )}
     </group>
   )
 }

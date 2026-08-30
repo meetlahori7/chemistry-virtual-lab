@@ -20,19 +20,19 @@ export const EXPERIMENTS = [
       },
       pH: 1.3,
       color: 'rgba(224, 242, 254, 0.4)',
-      equation: 'HCl (aq) + NaOH (aq) ➔ NaCl (aq) + H₂O (l) + ΔH',
+      equation: 'HCl (aq) + NaOH (aq) -> NaCl (aq) + H2O (l) + DeltaH',
       reactionNotice: 'Initial acidic solution with Phenolphthalein. Add NaOH dropwise to reach endpoint.',
     },
     steps: [
       '1. Observe the acidic solution (pH ≈ 1.3). It is currently colorless with Phenolphthalein present.',
       '2. Click "Add 0.1M NaOH" to dispense base.',
       '3. As pH crosses 8.2, notice the instantaneous transition to brilliant pink!',
-      '4. Observe the slight temperature rise due to exothermic neutralization enthalpy (ΔH = -57.1 kJ/mol).'
+      '4. Observe the slight temperature rise due to exothermic neutralization enthalpy (DeltaH = -57.1 kJ/mol).'
     ]
   },
   {
     id: 'boiling',
-    title: 'Thermal Convection & Boiling (CuSO₄)',
+    title: 'Thermal Convection & Boiling (CuSO4)',
     subtitle: 'Endothermic Heat Transfer & Phase Change Simulation',
     description: 'Heat a brilliant blue Copper(II) Sulfate solution using the Bunsen burner. Watch procedural convective bubbles form and steam vapor evolve as temperature reaches 100°C.',
     initialChemicals: {
@@ -49,7 +49,7 @@ export const EXPERIMENTS = [
       },
       pH: 4.5,
       color: 'rgba(14, 165, 233, 0.75)',
-      equation: 'CuSO₄·5H₂O (aq) + Heat ➔ Boiling Solution + H₂O (g) ↑',
+      equation: 'CuSO4·5H2O (aq) + Heat -> Boiling Solution + H2O (g) ↑',
       reactionNotice: 'Copper(II) Sulfate solution prepared. Toggle Bunsen Burner to begin heating.',
     },
     steps: [
@@ -78,7 +78,7 @@ export const EXPERIMENTS = [
       },
       pH: 7.0,
       color: 'rgba(34, 197, 94, 0.75)', // Green for neutral pH 7
-      equation: 'HInd ⇌ H⁺ + Ind⁻ (Multi-Indicator Equilibrium)',
+      equation: 'HInd <=> H+ + Ind- (Multi-Indicator Equilibrium)',
       reactionNotice: 'Neutral solution with Universal Indicator (Green, pH 7.0).',
     },
     steps: [
@@ -106,7 +106,7 @@ export const EXPERIMENTS = [
       },
       pH: 7.0,
       color: 'rgba(224, 242, 254, 0.45)',
-      equation: 'H₂O ⇌ H⁺ + OH⁻',
+      equation: 'H2O <=> H+ + OH-',
       reactionNotice: 'Fresh distilled water ready. Select any reagents from the bench or shelf.',
     },
     steps: [

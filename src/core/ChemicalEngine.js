@@ -2,12 +2,12 @@
 // Handles pH calculation, thermal dynamics, chemical reactions, and optical color mixing.
 
 export const CHEMICALS = {
-  H2O: { id: 'H2O', name: 'Distilled Water', formula: 'H₂O', color: '#e0f2fe', pH: 7.0, isAcid: false, isBase: false },
+  H2O: { id: 'H2O', name: 'Distilled Water', formula: 'H2O', color: '#e0f2fe', pH: 7.0, isAcid: false, isBase: false },
   HCL: { id: 'HCL', name: 'Hydrochloric Acid (0.1M)', formula: 'HCl', color: '#f8fafc', pH: 1.0, isAcid: true, isBase: false },
   NAOH: { id: 'NAOH', name: 'Sodium Hydroxide (0.1M)', formula: 'NaOH', color: '#f8fafc', pH: 13.0, isAcid: false, isBase: true },
-  PHENOL: { id: 'PHENOL', name: 'Phenolphthalein Indicator', formula: 'C₂₀H₁₄O₄', color: '#ffffff', isIndicator: true },
+  PHENOL: { id: 'PHENOL', name: 'Phenolphthalein Indicator', formula: 'C20H14O4', color: '#ffffff', isIndicator: true },
   UNIV_IND: { id: 'UNIV_IND', name: 'Universal Indicator', formula: 'UI Mix', color: '#22c55e', isIndicator: true },
-  CUSO4: { id: 'CUSO4', name: 'Copper(II) Sulfate (0.2M)', formula: 'CuSO₄', color: '#0284c7', pH: 4.5, isSalt: true }
+  CUSO4: { id: 'CUSO4', name: 'Copper(II) Sulfate (0.2M)', formula: 'CuSO4', color: '#0284c7', pH: 4.5, isSalt: true }
 };
 
 export const INITIAL_LAB_STATE = {
@@ -34,7 +34,7 @@ export const INITIAL_LAB_STATE = {
   pH: 7.0,
   color: 'rgba(224, 242, 254, 0.45)', // subtle clean water
   reactionNotice: 'Solution is neutral distilled water.',
-  equation: 'H₂O ⇌ H⁺ + OH⁻'
+  equation: 'H2O <=> H+ + OH-'
 };
 
 // Calculate pH based on current contents
@@ -106,28 +106,28 @@ export function addReagentToState(prevState, reagentKey, addedVolMl = 25) {
     case 'HCL': {
       const addedMoles = (addedVolMl / 1000.0) * 0.1;
       newContents.hMoles += addedMoles;
-      actionText = `Added ${addedVolMl}mL 0.1M HCl. Increased [H⁺] concentration.`;
+      actionText = `Added ${addedVolMl}mL 0.1M HCl. Increased [H+] concentration.`;
       
       // Exothermic neutralization if base was present
       if (prevState.contents.ohMoles > 0) {
         tempDelta += 3.5;
-        equationText = 'HCl (aq) + NaOH (aq) ➔ NaCl (aq) + H₂O (l) + ΔH';
+        equationText = 'HCl (aq) + NaOH (aq) -> NaCl (aq) + H2O (l) + DeltaH';
       } else {
-        equationText = 'HCl (aq) ➔ H⁺ (aq) + Cl⁻ (aq)';
+        equationText = 'HCl (aq) -> H+ (aq) + Cl- (aq)';
       }
       break;
     }
     case 'NAOH': {
       const addedMoles = (addedVolMl / 1000.0) * 0.1;
       newContents.ohMoles += addedMoles;
-      actionText = `Added ${addedVolMl}mL 0.1M NaOH. Increased [OH⁻] concentration.`;
+      actionText = `Added ${addedVolMl}mL 0.1M NaOH. Increased [OH-] concentration.`;
       
       // Exothermic neutralization if acid was present
       if (prevState.contents.hMoles > 0) {
         tempDelta += 3.5;
-        equationText = 'NaOH (aq) + HCl (aq) ➔ NaCl (aq) + H₂O (l) + ΔH';
+        equationText = 'NaOH (aq) + HCl (aq) -> NaCl (aq) + H2O (l) + DeltaH';
       } else {
-        equationText = 'NaOH (aq) ➔ Na⁺ (aq) + OH⁻ (aq)';
+        equationText = 'NaOH (aq) -> Na+ (aq) + OH- (aq)';
       }
       break;
     }
@@ -145,7 +145,7 @@ export function addReagentToState(prevState, reagentKey, addedVolMl = 25) {
       const addedMoles = (addedVolMl / 1000.0) * 0.2;
       newContents.cuMoles += addedMoles;
       actionText = `Added ${addedVolMl}mL Copper(II) Sulfate solution.`;
-      equationText = 'CuSO₄ (s) + H₂O (l) ➔ [Cu(H₂O)₆]²⁺ + SO₄²⁻';
+      equationText = 'CuSO4 (s) + H2O (l) -> [Cu(H2O)6](2+) + SO4(2-)';
       break;
     }
     case 'H2O': {

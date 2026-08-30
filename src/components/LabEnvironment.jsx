@@ -143,6 +143,8 @@ export default function LabEnvironment() {
         <Text
           position={[0, 1.1, 0.06]}
           fontSize={0.2}
+          maxWidth={5.8}
+          textAlign="center"
           color="#38bdf8"
           anchorX="center"
           anchorY="middle"
@@ -152,7 +154,9 @@ export default function LabEnvironment() {
         </Text>
         <Text
           position={[0, 0.7, 0.06]}
-          fontSize={0.12}
+          fontSize={0.1}
+          maxWidth={5.8}
+          textAlign="center"
           color="#94a3b8"
           anchorX="center"
           anchorY="middle"
@@ -161,16 +165,20 @@ export default function LabEnvironment() {
         </Text>
         <Text
           position={[0, 0.2, 0.06]}
-          fontSize={0.11}
+          fontSize={0.1}
+          maxWidth={5.8}
+          textAlign="center"
           color="#34d399"
           anchorX="center"
           anchorY="middle"
         >
-          ACID-BASE NEUTRALIZATION: HCl + NaOH ➔ NaCl + H₂O  (ΔH = -57.1 kJ/mol)
+          ACID-BASE NEUTRALIZATION: HCl + NaOH → NaCl + H2O  (DeltaH = -57.1 kJ/mol)
         </Text>
         <Text
           position={[0, -0.3, 0.06]}
-          fontSize={0.11}
+          fontSize={0.09}
+          maxWidth={5.8}
+          textAlign="center"
           color="#f59e0b"
           anchorX="center"
           anchorY="middle"
@@ -179,7 +187,9 @@ export default function LabEnvironment() {
         </Text>
         <Text
           position={[0, -0.8, 0.06]}
-          fontSize={0.1}
+          fontSize={0.09}
+          maxWidth={5.8}
+          textAlign="center"
           color="#64748b"
           anchorX="center"
           anchorY="middle"

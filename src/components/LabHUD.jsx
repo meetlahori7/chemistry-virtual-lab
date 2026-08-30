@@ -9,11 +9,19 @@ import {
   Activity,
   Beaker as BeakerIcon,
   HelpCircle,
-  Play,
   RotateCw,
   Camera,
-  Layers
+  Layers,
+  Atom,
+  Volume2,
+  VolumeX,
+  CheckCircle2,
+  Sliders,
+  Award,
+  TestTube,
+  BookOpen
 } from 'lucide-react'
+import IonVisualizerModal from './IonVisualizerModal'
 
 export default function LabHUD({
   labState,
@@ -21,12 +29,19 @@ export default function LabHUD({
   onToggleHeat,
   onToggleStir,
   onTriggerDropper,
+  onDipPHPaper,
   onReset,
   currentExperimentId,
   onSelectExperiment,
   onSetCameraView,
+  soundMuted,
+  onToggleSound,
 }) {
   const [showGuide, setShowGuide] = useState(true)
+  const [showIonModal, setShowIonModal] = useState(false)
+  const [reagentAmount, setReagentAmount] = useState(20) // mL selector
+  const [completedSteps, setCompletedSteps] = useState({})
+
   const currentExp = EXPERIMENTS.find((e) => e.id === currentExperimentId) || EXPERIMENTS[0]
 
   // Dynamic pH badge color
@@ -45,9 +60,17 @@ export default function LabHUD({
     return '#ef4444'
   }
 
+  // Toggle step completion manually or dynamically
+  const toggleStep = (idx) => {
+    setCompletedSteps((prev) => ({
+      ...prev,
+      [`${currentExperimentId}-${idx}`]: !prev[`${currentExperimentId}-${idx}`],
+    }))
+  }
+
   return (
     <div className="lab-hud-overlay">
-      {/* Top Header Bar */}
+      {/* Top Header Navigation Bar */}
       <header className="lab-topbar">
         <div className="lab-branding">
           <div className="lab-logo-icon">
@@ -65,31 +88,55 @@ export default function LabHUD({
             <button
               key={exp.id}
               className={`exp-tab-btn ${currentExperimentId === exp.id ? 'active' : ''}`}
-              onClick={() => onSelectExperiment(exp.id)}
+              onClick={() => {
+                setCompletedSteps({})
+                onSelectExperiment(exp.id)
+              }}
             >
               {exp.title.split('(')[0].trim()}
             </button>
           ))}
         </div>
 
-        {/* Camera Views & Help Toggle */}
+        {/* Action Controls: Audio, Camera, Ions, Guide */}
         <div className="lab-header-actions">
+          {/* Microscopic Ion Visualizer */}
+          <button
+            className="hud-icon-btn ion-btn-highlight"
+            onClick={() => setShowIonModal(true)}
+            title="Inspect Molecular Ions"
+          >
+            <Atom size={16} className="text-cyan animate-pulse" /> Microscopic Ions
+          </button>
+
+          {/* Sound Toggle */}
+          <button
+            className={`hud-icon-btn ${soundMuted ? 'muted' : ''}`}
+            onClick={onToggleSound}
+            title={soundMuted ? 'Unmute Sound FX' : 'Mute Sound FX'}
+          >
+            {soundMuted ? <VolumeX size={16} /> : <Volume2 size={16} className="text-sky" />}
+          </button>
+
+          {/* Camera View Switchers */}
           <div className="cam-btn-group">
             <button
               className="hud-icon-btn"
-              title="Overview Camera"
+              title="Overview View"
               onClick={() => onSetCameraView('overview')}
             >
-              <Camera size={16} /> Overview
+              <Camera size={15} /> Overview
             </button>
             <button
               className="hud-icon-btn"
-              title="Close-Up Reaction Focus"
+              title="Reaction Close-up Focus"
               onClick={() => onSetCameraView('focus')}
             >
-              <Layers size={16} /> Focus
+              <Layers size={15} /> Focus
             </button>
           </div>
+
+          {/* Guide Toggle */}
           <button
             className={`hud-icon-btn ${showGuide ? 'active' : ''}`}
             onClick={() => setShowGuide(!showGuide)}
@@ -100,7 +147,7 @@ export default function LabHUD({
         </div>
       </header>
 
-      {/* Main Working HUD Body */}
+      {/* Main HUD Body */}
       <div className="lab-hud-body">
         {/* Left Side: Real-Time Digital Telemetry & Reaction Monitor */}
         <aside className="telemetry-panel glassmorphic-card">
@@ -122,7 +169,10 @@ export default function LabHUD({
                 </span>
                 <span
                   className="telemetry-badge"
-                  style={{ backgroundColor: `${getPHColor(labState.pH)}22`, color: getPHColor(labState.pH) }}
+                  style={{
+                    backgroundColor: `${getPHColor(labState.pH)}22`,
+                    color: getPHColor(labState.pH),
+                  }}
                 >
                   {labState.pH < 6.8 ? 'Acidic' : labState.pH > 7.2 ? 'Alkaline' : 'Neutral'}
                 </span>
@@ -131,7 +181,9 @@ export default function LabHUD({
               <div className="ph-bar-container">
                 <div
                   className="ph-indicator-needle"
-                  style={{ left: `${(Math.min(14, Math.max(0, labState.pH)) / 14) * 100}%` }}
+                  style={{
+                    left: `${(Math.min(14, Math.max(0, labState.pH)) / 14) * 100}%`,
+                  }}
                 />
               </div>
             </div>
@@ -148,9 +200,16 @@ export default function LabHUD({
                 </span>
                 <span
                   className="telemetry-badge"
-                  style={{ backgroundColor: `${getTempColor(labState.temperature)}22`, color: getTempColor(labState.temperature) }}
+                  style={{
+                    backgroundColor: `${getTempColor(labState.temperature)}22`,
+                    color: getTempColor(labState.temperature),
+                  }}
                 >
-                  {labState.temperature > 85 ? 'Boiling' : labState.isHeating ? 'Heating' : 'Ambient'}
+                  {labState.temperature > 85
+                    ? 'Boiling'
+                    : labState.isHeating
+                    ? 'Heating'
+                    : 'Ambient'}
                 </span>
               </div>
               {/* Temp progress bar */}
@@ -172,9 +231,7 @@ export default function LabHUD({
                 <span className="telemetry-number text-sky">
                   {Math.round(labState.volume)} mL
                 </span>
-                <span className="telemetry-badge bg-sky">
-                  Max 300 mL
-                </span>
+                <span className="telemetry-badge bg-sky">Max 300 mL</span>
               </div>
             </div>
           </div>
@@ -193,7 +250,7 @@ export default function LabHUD({
           </div>
         </aside>
 
-        {/* Right Side: Step-by-Step Interactive Laboratory Guide */}
+        {/* Right Side: Step-by-Step Interactive Laboratory Guide with Checklist */}
         {showGuide && (
           <aside className="guide-panel glassmorphic-card">
             <div className="card-header">
@@ -203,17 +260,30 @@ export default function LabHUD({
             <p className="exp-description">{currentExp.description}</p>
 
             <div className="exp-steps-list">
-              <h3>LABORATORY PROTOCOL:</h3>
-              {currentExp.steps.map((step, idx) => (
-                <div key={idx} className="step-item">
-                  <div className="step-bullet">{idx + 1}</div>
-                  <p className="step-text">{step.replace(/^\d+\.\s*/, '')}</p>
-                </div>
-              ))}
+              <h3>LABORATORY PROTOCOL CHECKLIST:</h3>
+              {currentExp.steps.map((step, idx) => {
+                const isDone = !!completedSteps[`${currentExperimentId}-${idx}`]
+                return (
+                  <div
+                    key={idx}
+                    className={`step-item-interactive ${isDone ? 'step-completed' : ''}`}
+                    onClick={() => toggleStep(idx)}
+                  >
+                    <button className="step-checkbox-btn">
+                      {isDone ? (
+                        <CheckCircle2 size={18} className="text-emerald" />
+                      ) : (
+                        <div className="step-bullet">{idx + 1}</div>
+                      )}
+                    </button>
+                    <p className="step-text">{step.replace(/^\d+\.\s*/, '')}</p>
+                  </div>
+                )
+              })}
             </div>
 
             <div className="guide-tip">
-              💡 <strong>Tip:</strong> You can also click and drag with your mouse to orbit the 3D scene, scroll to zoom, and right-click to pan!
+              💡 <strong>Beginner Tip:</strong> Click directly on 3D bottles or apparatus in the laboratory to interact, or use the bottom action dock!
             </div>
           </aside>
         )}
@@ -221,28 +291,46 @@ export default function LabHUD({
 
       {/* Bottom Floating Interactive Chemical Action Bench */}
       <footer className="lab-action-dock glassmorphic-card">
+        {/* Reagents Section with Dosage Selector */}
         <div className="dock-section reagents-section">
-          <span className="dock-section-title">ADD REAGENTS</span>
+          <div className="flex items-center justify-between">
+            <span className="dock-section-title">ADD REAGENTS</span>
+            {/* Dosage Slider / Pills */}
+            <div className="dosage-selector">
+              <Sliders size={12} className="text-slate-400" />
+              <span className="dosage-label">Dose:</span>
+              {[10, 20, 30].map((vol) => (
+                <button
+                  key={vol}
+                  className={`dosage-pill ${reagentAmount === vol ? 'active' : ''}`}
+                  onClick={() => setReagentAmount(vol)}
+                >
+                  {vol}mL
+                </button>
+              ))}
+            </div>
+          </div>
+
           <div className="dock-btn-row">
             <button
               className="lab-btn reagent-btn acid-btn"
-              onClick={() => onAddReagent('HCL', 20)}
+              onClick={() => onAddReagent('HCL', reagentAmount)}
             >
-              <Droplet size={15} /> +20mL 0.1M HCl
+              <Droplet size={15} /> +{reagentAmount}mL 0.1M HCl
             </button>
 
             <button
               className="lab-btn reagent-btn base-btn"
-              onClick={() => onAddReagent('NAOH', 20)}
+              onClick={() => onAddReagent('NAOH', reagentAmount)}
             >
-              <Droplet size={15} /> +20mL 0.1M NaOH
+              <Droplet size={15} /> +{reagentAmount}mL 0.1M NaOH
             </button>
 
             <button
               className="lab-btn reagent-btn phenol-btn"
               onClick={() => onTriggerDropper('PHENOL')}
             >
-              <Droplet size={15} /> Phenolphthalein
+              <Droplet size={15} /> Phenolphthalein Drops
             </button>
 
             <button
@@ -254,23 +342,23 @@ export default function LabHUD({
 
             <button
               className="lab-btn reagent-btn cuso4-btn"
-              onClick={() => onAddReagent('CUSO4', 25)}
+              onClick={() => onAddReagent('CUSO4', reagentAmount)}
             >
-              <Droplet size={15} /> +25mL CuSO₄
+              <Droplet size={15} /> +{reagentAmount}mL CuSO4
             </button>
 
             <button
               className="lab-btn reagent-btn water-btn"
-              onClick={() => onAddReagent('H2O', 30)}
+              onClick={() => onAddReagent('H2O', reagentAmount + 10)}
             >
-              <Droplet size={15} /> +30mL H₂O
+              <Droplet size={15} /> +{reagentAmount + 10}mL H2O
             </button>
           </div>
         </div>
 
-        {/* Thermal & Physical Controls */}
+        {/* Thermal & Physical Tools Controls */}
         <div className="dock-section apparatus-section">
-          <span className="dock-section-title">APPARATUS CONTROLS</span>
+          <span className="dock-section-title">PHYSICAL TOOLS & APPARATUS</span>
           <div className="dock-btn-row">
             <button
               className={`lab-btn apparatus-btn ${labState.isHeating ? 'burner-active' : ''}`}
@@ -285,19 +373,34 @@ export default function LabHUD({
               onClick={onToggleStir}
             >
               <RotateCw size={16} className={labState.isStirring ? 'animate-spin' : ''} />
-              {labState.isStirring ? 'Stop Magnetic Stirrer' : 'Magnetic Stirrer'}
+              {labState.isStirring ? 'Stop Stirrer' : 'Glass Stirring Rod'}
+            </button>
+
+            <button
+              className="lab-btn ph-strip-btn"
+              onClick={onDipPHPaper}
+              title="Dip Litmus / pH Paper Strip"
+            >
+              <TestTube size={16} /> Dip pH Paper
             </button>
 
             <button
               className="lab-btn reset-btn"
               onClick={onReset}
-              title="Reset Beaker & Chemicals"
+              title="Reset Beaker & Solution"
             >
               <RotateCcw size={16} /> Reset
             </button>
           </div>
         </div>
       </footer>
+
+      {/* Microscopic Ion Visualizer Modal */}
+      <IonVisualizerModal
+        isOpen={showIonModal}
+        onClose={() => setShowIonModal(false)}
+        labState={labState}
+      />
     </div>
   )
 }

@@ -19,6 +19,7 @@ body,
   overflow: hidden;
   background-color: #090d16;
   color: #f8fafc;
+  user-select: none;
 }
 
 .lab-viewport-container {
@@ -30,12 +31,12 @@ body,
 
 /* --- Glassmorphic Common Base --- */
 .glassmorphic-card {
-  background: rgba(15, 23, 42, 0.78);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  background: rgba(15, 23, 42, 0.82);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 14px;
-  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
 /* --- Top Header Bar --- */
@@ -44,23 +45,28 @@ body,
   top: 14px;
   left: 20px;
   right: 20px;
-  height: 60px;
+  height: auto;
+  min-height: 52px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 20px;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 8px 16px;
   z-index: 50;
-  background: rgba(15, 23, 42, 0.85);
-  backdrop-filter: blur(16px);
+  background: rgba(15, 23, 42, 0.88);
+  backdrop-filter: blur(18px);
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 14px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
 }
 
 .lab-branding {
   display: flex;
   align-items: center;
   gap: 12px;
+  flex-shrink: 0;
+  min-width: 0;
 }
 
 .lab-logo-icon {
@@ -75,9 +81,10 @@ body,
 }
 
 .lab-title {
-  font-size: 15px;
+  font-size: 13px;
   font-weight: 800;
   letter-spacing: 0.8px;
+  white-space: nowrap;
   background: linear-gradient(90deg, #38bdf8, #818cf8);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -92,23 +99,34 @@ body,
 .lab-exp-tabs {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   background: rgba(0, 0, 0, 0.35);
   padding: 4px;
   border-radius: 10px;
   border: 1px solid rgba(255, 255, 255, 0.06);
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow-x: auto;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.lab-exp-tabs::-webkit-scrollbar {
+  display: none;
 }
 
 .exp-tab-btn {
   background: transparent;
   border: none;
   color: #94a3b8;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 600;
-  padding: 7px 14px;
+  padding: 6px 10px;
   border-radius: 7px;
   cursor: pointer;
   transition: all 0.2s ease;
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .exp-tab-btn:hover {
@@ -125,12 +143,13 @@ body,
 .lab-header-actions {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
+  flex-shrink: 0;
 }
 
 .cam-btn-group {
   display: flex;
-  gap: 6px;
+  gap: 5px;
 }
 
 .hud-icon-btn {
@@ -155,13 +174,29 @@ body,
   color: #38bdf8;
 }
 
+.hud-icon-btn.muted {
+  color: #ef4444;
+  border-color: rgba(239, 68, 68, 0.4);
+}
+
+.ion-btn-highlight {
+  background: rgba(6, 182, 212, 0.18);
+  border-color: #06b6d4;
+  color: #a5f3fc;
+}
+
+.ion-btn-highlight:hover {
+  background: rgba(6, 182, 212, 0.3);
+  box-shadow: 0 0 12px rgba(6, 182, 212, 0.4);
+}
+
 /* --- Main Layout HUD Body --- */
 .lab-hud-body {
   position: absolute;
   top: 86px;
   left: 20px;
   right: 20px;
-  bottom: 110px;
+  bottom: 125px;
   pointer-events: none;
   display: flex;
   justify-content: space-between;
@@ -177,7 +212,7 @@ body,
   display: flex;
   flex-direction: column;
   gap: 14px;
-  max-height: calc(100vh - 210px);
+  max-height: calc(100vh - 225px);
   overflow-y: auto;
 }
 
@@ -329,7 +364,7 @@ body,
   font-size: 10px;
 }
 
-/* Guide Panel */
+/* Guide Panel & Checklist */
 .exp-description {
   font-size: 12px;
   color: #cbd5e1;
@@ -344,10 +379,39 @@ body,
   margin-bottom: 8px;
 }
 
-.step-item {
+.step-item-interactive {
   display: flex;
+  align-items: flex-start;
   gap: 10px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
   margin-bottom: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.step-item-interactive:hover {
+  background: rgba(56, 189, 248, 0.1);
+  border-color: rgba(56, 189, 248, 0.3);
+}
+
+.step-completed {
+  background: rgba(16, 185, 129, 0.1);
+  border-color: rgba(16, 185, 129, 0.3);
+}
+
+.step-completed .step-text {
+  text-decoration: line-through;
+  color: #94a3b8;
+}
+
+.step-checkbox-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
 }
 
 .step-bullet {
@@ -404,6 +468,40 @@ body,
   font-weight: 700;
   color: #94a3b8;
   letter-spacing: 0.8px;
+}
+
+.dosage-selector {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-left: 12px;
+}
+
+.dosage-label {
+  font-size: 10px;
+  color: #94a3b8;
+}
+
+.dosage-pill {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #cbd5e1;
+  font-size: 10px;
+  padding: 2px 7px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.dosage-pill:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.dosage-pill.active {
+  background: #38bdf8;
+  color: #0f172a;
+  border-color: #38bdf8;
 }
 
 .dock-btn-row {
@@ -479,6 +577,17 @@ body,
   color: #ffffff;
 }
 
+.ph-strip-btn {
+  background: rgba(234, 179, 8, 0.15);
+  border-color: rgba(234, 179, 8, 0.4);
+  color: #fef08a;
+}
+
+.ph-strip-btn:hover {
+  background: rgba(234, 179, 8, 0.3);
+  color: #ffffff;
+}
+
 .burner-active {
   background: #dc2626 !important;
   border-color: #f87171 !important;
@@ -504,11 +613,252 @@ body,
   color: #ef4444;
 }
 
-/* Utility Colors & Animations */
+/* --- Microscopic Ion Modal --- */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.modal-card {
+  width: 580px;
+  max-width: 90vw;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  gap: 16px;
+  background: rgba(15, 23, 42, 0.95);
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 12px;
+}
+
+.modal-title {
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 0.6px;
+  color: #38bdf8;
+}
+
+.modal-close-btn {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 6px;
+}
+
+.modal-close-btn:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.modal-tabs {
+  display: flex;
+  gap: 8px;
+}
+
+.modal-tab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #cbd5e1;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.modal-tab.active {
+  background: #0284c7;
+  color: #ffffff;
+  border-color: #38bdf8;
+}
+
+.modal-body {
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.section-intro {
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+/* Ion Chamber Simulation */
+.ion-chamber {
+  position: relative;
+  height: 200px;
+  background: radial-gradient(circle at center, #0f172a 0%, #020617 100%);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.ion-water-label {
+  position: absolute;
+  bottom: 8px;
+  right: 12px;
+  font-size: 10px;
+  color: rgba(56, 189, 248, 0.5);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.ion-particle {
+  position: absolute;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  font-weight: 800;
+  box-shadow: 0 0 10px currentColor;
+  animation: floatIon 3s ease-in-out infinite alternate;
+}
+
+.ion-h {
+  background: rgba(239, 68, 68, 0.25);
+  border: 2px solid #ef4444;
+  color: #fca5a5;
+}
+
+.ion-oh {
+  background: rgba(6, 182, 212, 0.25);
+  border: 2px solid #06b6d4;
+  color: #67e8f9;
+}
+
+.ion-na {
+  background: rgba(147, 51, 234, 0.2);
+  border: 2px solid #a855f7;
+  color: #d8b4fe;
+}
+
+.ion-cl {
+  background: rgba(34, 197, 94, 0.2);
+  border: 2px solid #22c55e;
+  color: #86efac;
+}
+
+.ion-cu {
+  background: rgba(2, 132, 199, 0.3);
+  border: 2px solid #38bdf8;
+  color: #7dd3fc;
+}
+
+@keyframes floatIon {
+  0% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(12px, -15px) scale(1.08); }
+  100% { transform: translate(-8px, 12px) scale(0.95); }
+}
+
+.species-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.species-card {
+  background: rgba(0, 0, 0, 0.3);
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.species-name {
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.species-val {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11.5px;
+  color: #f1f5f9;
+}
+
+.theory-item {
+  background: rgba(0, 0, 0, 0.3);
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  margin-bottom: 10px;
+}
+
+.theory-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.theory-header h3 {
+  font-size: 13px;
+  font-weight: 700;
+  color: #f8fafc;
+}
+
+.theory-item p {
+  font-size: 12px;
+  color: #cbd5e1;
+  line-height: 1.5;
+  margin-bottom: 6px;
+}
+
+.theory-item code {
+  display: block;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: #38bdf8;
+  background: rgba(0, 0, 0, 0.4);
+  padding: 6px 10px;
+  border-radius: 6px;
+}
+
+/* Utilities */
 .text-cyan { color: #06b6d4; }
 .text-amber { color: #f59e0b; }
 .text-sky { color: #38bdf8; }
+.text-red { color: #ef4444; }
+.text-emerald { color: #10b981; }
 .bg-sky { background: rgba(56, 189, 248, 0.15); color: #38bdf8; }
+
+.flex { display: flex; }
+.items-center { align-items: center; }
+.justify-between { justify-content: space-between; }
+.gap-2 { gap: 8px; }
+
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
 
 .animate-spin {
   animation: spin 1s linear infinite;
@@ -519,21 +869,48 @@ body,
   to { transform: rotate(360deg); }
 }
 
-/* Custom Scrollbar for sidebars */
+/* --- Responsive Header Breakpoints --- */
+@media (max-width: 1400px) {
+  .lab-subtitle {
+    display: none;
+  }
+  .exp-tab-btn {
+    font-size: 10px;
+    padding: 5px 8px;
+  }
+  .hud-icon-btn {
+    font-size: 11px;
+    padding: 5px 8px;
+  }
+}
+
+@media (max-width: 1280px) {
+  .lab-title {
+    font-size: 11px;
+    letter-spacing: 0.5px;
+  }
+  .lab-logo-icon {
+    width: 32px;
+    height: 32px;
+  }
+  .lab-exp-tabs {
+    max-width: 50%;
+  }
+  .hud-icon-btn {
+    font-size: 10px;
+    padding: 4px 6px;
+    gap: 4px;
+  }
+}
+
 ::-webkit-scrollbar {
   width: 5px;
 }
-
 ::-webkit-scrollbar-track {
   background: rgba(0, 0, 0, 0.2);
   border-radius: 4px;
 }
-
 ::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.2);
   border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.35);
 }

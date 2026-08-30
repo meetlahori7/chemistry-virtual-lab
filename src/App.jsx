@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { Canvas } from '@react-three/fiber'
 import { OrbitControls, ContactShadows } from '@react-three/drei'
+import confetti from 'canvas-confetti'
 import * as THREE from 'three'
 
 import LabEnvironment from './components/LabEnvironment'
@@ -11,6 +12,9 @@ import TestTubeRack from './components/TestTubeRack'
 import ErlenmeyerFlask from './components/ErlenmeyerFlask'
 import DigitalProbe from './components/DigitalProbe'
 import PipetteDropper from './components/PipetteDropper'
+import StirringRod from './components/StirringRod'
+import PHPaperStrip from './components/PHPaperStrip'
+import AnimatedPourStream from './components/AnimatedPourStream'
 import LabHUD from './components/LabHUD'
 
 import {
@@ -19,6 +23,7 @@ import {
   calculateSolutionColor,
 } from './core/ChemicalEngine'
 import { EXPERIMENTS } from './experiments/experimentList'
+import { soundManager } from './core/SoundEngine'
 
 // Camera controller component to handle smooth animated presets
 function CameraRig({ cameraMode }) {
@@ -53,6 +58,20 @@ export default function App() {
   const [currentExpId, setCurrentExpId] = useState('titration')
   const [cameraMode, setCameraMode] = useState('overview')
   const [dropperActive, setDropperActive] = useState(false)
+  const [activePourReagent, setActivePourReagent] = useState(null)
+  const [soundMuted, setSoundMuted] = useState(false)
+  const [celebrated, setCelebrated] = useState({})
+  const phStripRef = useRef()
+
+  // Bottle initial coordinates map for pour animations
+  const bottleCoords = {
+    HCL: [-3.0, -1.05, 1.6],
+    NAOH: [-2.2, -1.05, 1.6],
+    PHENOL: [-1.4, -1.05, 1.6],
+    UNIV_IND: [1.4, -1.05, 1.6],
+    CUSO4: [2.2, -1.05, 1.6],
+    H2O: [3.0, -1.05, 1.6],
+  }
 
   // Initialize experiment setup
   const loadExperiment = (expId) => {
@@ -70,21 +89,67 @@ export default function App() {
     setLabState(baseState)
   }
 
-  // Initial load for default experiment
+  // Initial load
   useEffect(() => {
     loadExperiment('titration')
   }, [])
 
-  // Continuous thermal simulation loop (heating up to 100°C or cooling down to 22°C)
+  // Milestone Celebration triggers
+  useEffect(() => {
+    // 1. Titration Equivalence Point Pink color milestone
+    if (
+      currentExpId === 'titration' &&
+      labState.contents.hasPhenol &&
+      labState.pH >= 8.2 &&
+      !celebrated['titration-endpoint']
+    ) {
+      setCelebrated((prev) => ({ ...prev, 'titration-endpoint': true }))
+      soundManager.playSuccessChime()
+      try {
+        confetti({
+          particleCount: 75,
+          spread: 70,
+          origin: { y: 0.6 },
+          colors: ['#ec4899', '#f472b6', '#38bdf8', '#34d399'],
+        })
+      } catch (e) {}
+    }
+
+    // 2. Boiling reached milestone
+    if (
+      currentExpId === 'boiling' &&
+      labState.temperature >= 95 &&
+      !celebrated['boiling-reached']
+    ) {
+      setCelebrated((prev) => ({ ...prev, 'boiling-reached': true }))
+      soundManager.playSuccessChime()
+      try {
+        confetti({
+          particleCount: 70,
+          spread: 60,
+          origin: { y: 0.6 },
+          colors: ['#38bdf8', '#0284c7', '#f59e0b'],
+        })
+      } catch (e) {}
+    }
+  }, [labState.pH, labState.temperature, currentExpId, celebrated, labState.contents.hasPhenol])
+
+  // Continuous thermal simulation loop
   useEffect(() => {
     const interval = setInterval(() => {
       setLabState((prev) => {
         if (prev.isHeating && prev.temperature < 100) {
           const nextTemp = Math.min(100, prev.temperature + 1.8)
+          if (nextTemp >= 70 && Math.random() > 0.6) {
+            soundManager.playBubbles()
+          }
           return {
             ...prev,
             temperature: nextTemp,
-            reactionNotice: nextTemp >= 80 ? '⚠️ Solution is vigorously boiling!' : 'Heating in progress...',
+            reactionNotice:
+              nextTemp >= 80
+                ? '⚠️ Solution is vigorously boiling (100°C) with steam vaporization!'
+                : 'Heating solution with Bunsen Burner...',
           }
         } else if (!prev.isHeating && prev.temperature > 22.0) {
           const nextTemp = Math.max(22.0, prev.temperature - 0.8)
@@ -102,36 +167,69 @@ export default function App() {
 
   // Action Handlers
   const handleAddReagent = (reagentKey, amount = 20) => {
-    setLabState((prev) => addReagentToState(prev, reagentKey, amount))
+    soundManager.playPourLiquid(0.9)
+    setActivePourReagent(reagentKey)
+
+    // Reset pour animation state after brief duration
+    setTimeout(() => {
+      setActivePourReagent(null)
+      setLabState((prev) => addReagentToState(prev, reagentKey, amount))
+    }, 600)
   }
 
   const handleToggleHeat = () => {
+    soundManager.playBurnerIgnition()
     setLabState((prev) => ({
       ...prev,
       isHeating: !prev.isHeating,
-      lastAction: prev.isHeating ? 'Extinguished Bunsen Burner flame.' : 'Ignited Bunsen Burner blue heating flame.',
+      lastAction: prev.isHeating
+        ? 'Extinguished Bunsen Burner flame.'
+        : 'Ignited Bunsen Burner blue heating flame.',
     }))
   }
 
   const handleToggleStir = () => {
+    soundManager.playGlassClink()
     setLabState((prev) => ({
       ...prev,
       isStirring: !prev.isStirring,
-      lastAction: prev.isStirring ? 'Stopped magnetic stirrer.' : 'Started magnetic stirring vortex.',
+      lastAction: prev.isStirring
+        ? 'Stopped magnetic stirrer.'
+        : 'Started glass rod stirring vortex.',
     }))
   }
 
   const handleTriggerDropper = (reagentKey = 'PHENOL') => {
+    soundManager.playDroplet()
     setDropperActive(true)
-    handleAddReagent(reagentKey, 5)
     setTimeout(() => {
+      handleAddReagent(reagentKey, 5)
       setDropperActive(false)
-    }, 1200)
+    }, 700)
+  }
+
+  const handleDipPHPaper = () => {
+    if (phStripRef.current) {
+      phStripRef.current.triggerDip && phStripRef.current.triggerDip()
+    }
   }
 
   const handleReset = () => {
+    soundManager.playGlassClink()
+    setCelebrated({})
     loadExperiment(currentExpId)
   }
+
+  const handleToggleSound = () => {
+    const next = !soundMuted
+    setSoundMuted(next)
+    soundManager.setMuted(next)
+  }
+
+  // Calculate pouring stream coordinates
+  const pourStart = activePourReagent
+    ? [-0.7, 0.4, 0]
+    : [0, 0, 0]
 
   return (
     <div className="lab-viewport-container">
@@ -142,7 +240,7 @@ export default function App() {
         gl={{ antialias: true, alpha: false }}
         style={{ width: '100vw', height: '100vh', background: '#090d16' }}
       >
-        {/* Realistic Laboratory Lighting */}
+        {/* Laboratory Illumination */}
         <ambientLight intensity={0.65} color="#e2e8f0" />
         <directionalLight
           position={[5, 9, 6]}
@@ -153,9 +251,7 @@ export default function App() {
           shadow-bias={-0.0001}
           color="#f8fafc"
         />
-        {/* Soft fill light from left */}
         <directionalLight position={[-6, 6, 2]} intensity={0.4} color="#38bdf8" />
-        {/* Back rim light */}
         <directionalLight position={[0, 4, -4]} intensity={0.3} color="#94a3b8" />
 
         {/* --- 3D Scene Objects --- */}
@@ -178,6 +274,12 @@ export default function App() {
           isStirring={labState.isStirring}
         />
 
+        {/* Glass Stirring Rod in Beaker */}
+        <StirringRod
+          position={[0, -1.05 + (labState.isHeating ? 1.25 : 0), 0]}
+          isStirring={labState.isStirring}
+        />
+
         {/* Retort Stand with Digital pH/Temperature Probe dipped in beaker */}
         <DigitalProbe
           position={[0.9, -1.05, -0.2]}
@@ -185,73 +287,101 @@ export default function App() {
           temperature={labState.temperature}
         />
 
+        {/* Litmus / Universal pH Paper Test Strip on table */}
+        <PHPaperStrip
+          ref={phStripRef}
+          position={[1.2, -1.04, 0.9]}
+          beakerPos={[0, -1.05 + (labState.isHeating ? 1.25 : 0), 0]}
+          currentPH={labState.pH}
+        />
+
         {/* Dropper Pipette hovered above beaker */}
         <PipetteDropper
-          position={[0, 1.2, 0]}
+          position={[0.8, 0.0, 0.6]}
           liquidColor={labState.color}
           isActive={dropperActive}
+        />
+
+        {/* Animated Pouring Stream during addition */}
+        <AnimatedPourStream
+          startPos={pourStart}
+          endPos={[0, -0.6 + (labState.isHeating ? 1.25 : 0), 0]}
+          color={labState.color}
+          isPouring={!!activePourReagent}
         />
 
         {/* Chemical Reagent Bottles on the Laboratory Bench */}
         {/* 0.1M HCl (Acid) */}
         <ReagentBottle
-          position={[-2.9, -1.05, 0.9]}
+          position={[-3.0, -1.05, 1.6]}
+          targetPourPos={[0, 0.6, 0]}
           formula="HCl"
           name="Hydrochloric Acid"
           concentration="0.1 M"
           color="#f8fafc"
+          isCurrentlyPouring={activePourReagent === 'HCL'}
           onClick={() => handleAddReagent('HCL', 20)}
         />
 
         {/* 0.1M NaOH (Base) */}
         <ReagentBottle
-          position={[-2.1, -1.05, 0.9]}
+          position={[-2.2, -1.05, 1.6]}
+          targetPourPos={[0, 0.6, 0]}
           formula="NaOH"
           name="Sodium Hydroxide"
           concentration="0.1 M"
           color="#f8fafc"
+          isCurrentlyPouring={activePourReagent === 'NAOH'}
           onClick={() => handleAddReagent('NAOH', 20)}
         />
 
         {/* Phenolphthalein Indicator (Amber bottle) */}
         <ReagentBottle
-          position={[-1.3, -1.05, 0.9]}
-          formula="C₂₀H₁₄O₄"
+          position={[-1.4, -1.05, 1.6]}
+          targetPourPos={[0, 0.6, 0]}
+          formula="C20H14O4"
           name="Phenolphthalein"
           concentration="1% in EtOH"
           color="#f43f5e"
           isAmber={true}
+          isCurrentlyPouring={activePourReagent === 'PHENOL'}
           onClick={() => handleTriggerDropper('PHENOL')}
         />
 
         {/* Universal Indicator */}
         <ReagentBottle
-          position={[1.3, -1.05, 0.9]}
+          position={[1.4, -1.05, 1.6]}
+          targetPourPos={[0, 0.6, 0]}
           formula="Univ. Ind."
           name="Universal Indicator"
           concentration="Broad Range"
           color="#22c55e"
           isAmber={true}
+          isCurrentlyPouring={activePourReagent === 'UNIV_IND'}
           onClick={() => handleAddReagent('UNIV_IND', 10)}
         />
 
         {/* Copper(II) Sulfate */}
         <ReagentBottle
-          position={[2.1, -1.05, 0.9]}
-          formula="CuSO₄"
+          position={[2.2, -1.05, 1.6]}
+          targetPourPos={[0, 0.6, 0]}
+          formula="CuSO4"
           name="Copper(II) Sulfate"
           concentration="0.2 M"
           color="#0284c7"
+          isCurrentlyPouring={activePourReagent === 'CUSO4'}
           onClick={() => handleAddReagent('CUSO4', 25)}
         />
 
         {/* Distilled Water */}
         <ReagentBottle
-          position={[2.9, -1.05, 0.9]}
-          formula="H₂O"
+          position={[3.0, -1.05, 1.6]}
+          targetPourPos={[0, 0.6, 0]}
+          formula="H2O"
           name="Distilled Water"
           concentration="Pure (pH 7)"
           color="#e0f2fe"
+          isCurrentlyPouring={activePourReagent === 'H2O'}
           onClick={() => handleAddReagent('H2O', 30)}
         />
 
@@ -276,7 +406,7 @@ export default function App() {
           onClick={() => handleAddReagent('NAOH', 15)}
         />
 
-        {/* Soft Realistic Contact Shadows on the Workbench */}
+        {/* Soft Contact Shadows on the Workbench */}
         <ContactShadows
           position={[0, -1.04, 0]}
           opacity={0.7}
@@ -296,10 +426,13 @@ export default function App() {
         onToggleHeat={handleToggleHeat}
         onToggleStir={handleToggleStir}
         onTriggerDropper={handleTriggerDropper}
+        onDipPHPaper={handleDipPHPaper}
         onReset={handleReset}
         currentExperimentId={currentExpId}
         onSelectExperiment={loadExperiment}
         onSetCameraView={setCameraMode}
+        soundMuted={soundMuted}
+        onToggleSound={handleToggleSound}
       />
     </div>
   )
