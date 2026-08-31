@@ -171,7 +171,7 @@ export default function IonVisualizerModal({
                 When an acid ($HCl$) and a base ($NaOH$) are combined, the hydrogen ions ($H^+$) and
                 hydroxide ions ($OH^-$) immediately react to form neutral water ($H_2O$):
               </p>
-              <code>H+(aq) + OH-(aq) -> H2O(l) + Heat (ΔH = -57.1 kJ/mol)</code>
+              <code>H+(aq) + OH-(aq) → H2O(l) + Heat (ΔH = -57.1 kJ/mol)</code>
             </div>
 
             <div className="theory-item">

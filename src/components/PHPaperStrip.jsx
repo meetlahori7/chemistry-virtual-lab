@@ -4,13 +4,13 @@ import { Text } from '@react-three/drei'
 import * as THREE from 'three'
 import { soundManager } from '../core/SoundEngine'
 
-export default function PHPaperStrip({
+const PHPaperStrip = React.forwardRef(({
   position = [1.1, -1.04, 0.9],
   beakerPos = [0, -1.05, 0],
   currentPH = 7.0,
   onDip,
   ...props
-}) {
+}, ref) => {
   const [isDipping, setIsDipping] = useState(false)
   const [dippedColor, setDippedColor] = useState('#fde047') // initial dry yellow
   const [isTested, setIsTested] = useState(false)
@@ -36,6 +36,8 @@ export default function PHPaperStrip({
     dipProgress.current = 0
     onDip && onDip()
   }
+
+  React.useImperativeHandle(ref, () => ({ triggerDip }));
 
   useFrame((state, delta) => {
     if (isDipping && stripGroup.current) {
@@ -120,4 +122,6 @@ export default function PHPaperStrip({
       </group>
     </group>
   )
-}
+})
+
+export default PHPaperStrip;

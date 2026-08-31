@@ -313,7 +313,7 @@ export default function App() {
         {/* Chemical Reagent Bottles on the Laboratory Bench */}
         {/* 0.1M HCl (Acid) */}
         <ReagentBottle
-          position={[-3.0, -1.05, 1.6]}
+          position={[-3.0, -1.05, -1.5]}
           targetPourPos={[0, 0.6, 0]}
           formula="HCl"
           name="Hydrochloric Acid"
@@ -325,7 +325,7 @@ export default function App() {
 
         {/* 0.1M NaOH (Base) */}
         <ReagentBottle
-          position={[-2.2, -1.05, 1.6]}
+          position={[-2.2, -1.05, -1.5]}
           targetPourPos={[0, 0.6, 0]}
           formula="NaOH"
           name="Sodium Hydroxide"
@@ -337,7 +337,7 @@ export default function App() {
 
         {/* Phenolphthalein Indicator (Amber bottle) */}
         <ReagentBottle
-          position={[-1.4, -1.05, 1.6]}
+          position={[-1.4, -1.05, -1.5]}
           targetPourPos={[0, 0.6, 0]}
           formula="C20H14O4"
           name="Phenolphthalein"
@@ -350,7 +350,7 @@ export default function App() {
 
         {/* Universal Indicator */}
         <ReagentBottle
-          position={[1.4, -1.05, 1.6]}
+          position={[1.4, -1.05, -1.5]}
           targetPourPos={[0, 0.6, 0]}
           formula="Univ. Ind."
           name="Universal Indicator"
@@ -363,7 +363,7 @@ export default function App() {
 
         {/* Copper(II) Sulfate */}
         <ReagentBottle
-          position={[2.2, -1.05, 1.6]}
+          position={[2.2, -1.05, -1.5]}
           targetPourPos={[0, 0.6, 0]}
           formula="CuSO4"
           name="Copper(II) Sulfate"
@@ -375,7 +375,7 @@ export default function App() {
 
         {/* Distilled Water */}
         <ReagentBottle
-          position={[3.0, -1.05, 1.6]}
+          position={[3.0, -1.05, -1.5]}
           targetPourPos={[0, 0.6, 0]}
           formula="H2O"
           name="Distilled Water"
@@ -420,7 +420,9 @@ export default function App() {
       </Canvas>
 
       {/* Modern High-Tech Glassmorphic Laboratory HUD */}
-      <LabHUD
+      <div className="lab-hud-overlay">
+        <LabHUD
+
         labState={labState}
         onAddReagent={handleAddReagent}
         onToggleHeat={handleToggleHeat}
@@ -433,7 +435,8 @@ export default function App() {
         onSetCameraView={setCameraMode}
         soundMuted={soundMuted}
         onToggleSound={handleToggleSound}
-      />
+        />
+      </div>
     </div>
   )
 }

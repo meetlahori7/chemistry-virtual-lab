@@ -69,7 +69,7 @@ export default function LabHUD({
   }
 
   return (
-    <div className="lab-hud-overlay">
+    <React.Fragment>
       {/* Top Header Navigation Bar */}
       <header className="lab-topbar">
         <div className="lab-branding">
@@ -401,6 +401,6 @@ export default function LabHUD({
         onClose={() => setShowIonModal(false)}
         labState={labState}
       />
-    </div>
+    </React.Fragment>
   )
 }
