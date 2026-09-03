@@ -69,40 +69,14 @@ export default function BunsenBurner({
         <meshStandardMaterial color="#94a3b8" metalness={0.9} roughness={0.2} />
       </mesh>
 
-      {/* --- Tripod Stand with Wire Gauze & Ceramic Center --- */}
-      <group position={[0, 0, 0]}>
-        {/* 3 Tripod Steel Legs */}
-        {[0, (2 * Math.PI) / 3, (4 * Math.PI) / 3].map((angle, idx) => (
-          <group key={idx} rotation={[0, angle, 0]}>
-            <mesh position={[0.75, 1.1, 0]} rotation={[0, 0, -0.15]} castShadow>
-              <cylinderGeometry args={[0.035, 0.035, 2.25, 12]} />
-              <meshStandardMaterial color="#475569" metalness={0.8} roughness={0.3} />
-            </mesh>
-          </group>
+      {/* Brass Air-Vent Adjustment Collar Slots */}
+      <group position={[0, 0.35, 0]}>
+        {[0, Math.PI / 2, Math.PI, (3 * Math.PI) / 2].map((ang, i) => (
+          <mesh key={i} rotation={[0, ang, 0]} position={[0.085, 0, 0]}>
+            <boxGeometry args={[0.02, 0.08, 0.04]} />
+            <meshStandardMaterial color="#0f172a" />
+          </mesh>
         ))}
-
-        {/* Circular Top Support Ring */}
-        <mesh position={[0, 2.2, 0]} castShadow>
-          <torusGeometry args={[0.85, 0.04, 16, 32]} />
-          <meshStandardMaterial color="#334155" metalness={0.8} />
-        </mesh>
-
-        {/* Wire Gauze Mesh Platform */}
-        <mesh position={[0, 2.22, 0]} receiveShadow castShadow>
-          <boxGeometry args={[1.5, 0.02, 1.5]} />
-          <meshStandardMaterial
-            color="#64748b"
-            metalness={0.7}
-            roughness={0.5}
-            wireframe={false}
-          />
-        </mesh>
-
-        {/* Ceramic Heat Center Disc (Prevents thermal shock) */}
-        <mesh position={[0, 2.235, 0]}>
-          <cylinderGeometry args={[0.45, 0.45, 0.015, 32]} />
-          <meshStandardMaterial color="#f1f5f9" roughness={0.9} />
-        </mesh>
       </group>
 
       {/* --- Procedural 3D Glowing Burner Flame --- */}

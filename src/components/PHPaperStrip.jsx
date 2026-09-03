@@ -91,6 +91,12 @@ const PHPaperStrip = React.forwardRef(({
       }}
       {...props}
     >
+      {/* Generous touch hitbox */}
+      <mesh position={[0, 0.05, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+        <planeGeometry args={[0.7, 0.9]} />
+        <meshBasicMaterial transparent opacity={0} depthWrite={false} />
+      </mesh>
+
       {/* Dry Paper Strip Upper Portion */}
       <mesh position={[0, 0.01, -0.15]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
         <planeGeometry args={[0.18, 0.4]} />

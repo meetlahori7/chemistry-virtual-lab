@@ -21,6 +21,8 @@ export default function ReagentBottle({
   const currentPos = useRef(new THREE.Vector3(...position))
   const currentRot = useRef(new THREE.Euler(0, 0, 0))
 
+  const [pressed, setPressed] = useState(false)
+
   useFrame((state, delta) => {
     if (!groupRef.current) return
 
@@ -41,19 +43,36 @@ export default function ReagentBottle({
     <group
       ref={groupRef}
       position={position}
-      scale={hovered ? 1.08 : 1.0}
+      scale={pressed ? 0.95 : hovered ? 1.08 : 1.0}
       onPointerOver={(e) => {
         e.stopPropagation()
         setHovered(true)
         soundManager.playGlassClink()
       }}
-      onPointerOut={() => setHovered(false)}
+      onPointerOut={() => {
+        setHovered(false)
+        setPressed(false)
+      }}
+      onPointerDown={(e) => {
+        e.stopPropagation()
+        setPressed(true)
+      }}
+      onPointerUp={(e) => {
+        e.stopPropagation()
+        setPressed(false)
+      }}
       onClick={(e) => {
         e.stopPropagation()
         onClick && onClick()
       }}
       {...props}
     >
+      {/* Generous Touch Target Hitbox for Mobile & Mouse */}
+      <mesh position={[0, 0.65, 0]}>
+        <cylinderGeometry args={[0.55, 0.55, 1.4, 16]} />
+        <meshBasicMaterial transparent opacity={0} depthWrite={false} />
+      </mesh>
+
       {/* Bottle Body */}
       <mesh position={[0, 0.45, 0]} castShadow receiveShadow>
         <cylinderGeometry args={[0.3, 0.3, 0.9, 32]} />

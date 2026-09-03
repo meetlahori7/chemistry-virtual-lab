@@ -6,29 +6,29 @@ export default function LabEnvironment() {
     <group position={[0, -1.2, 0]}>
       {/* --- Laboratory Workbench (Main Table) --- */}
       <group position={[0, 0, 0]}>
-        {/* Countertop: Durable black/dark epoxy chemical-resistant resin */}
+        {/* Countertop: Durable chemical-resistant laboratory resin */}
         <mesh position={[0, 0, 0]} receiveShadow castShadow>
           <boxGeometry args={[10, 0.25, 4.5]} />
           <meshStandardMaterial
-            color="#1e293b"
-            roughness={0.25}
-            metalness={0.1}
+            color="#181a20"
+            roughness={0.2}
+            metalness={0.15}
           />
         </mesh>
 
-        {/* Countertop Front Beveled Lip */}
+        {/* Countertop Front Lip */}
         <mesh position={[0, 0.05, 2.27]} receiveShadow>
           <boxGeometry args={[10.04, 0.15, 0.08]} />
-          <meshStandardMaterial color="#0f172a" roughness={0.3} metalness={0.2} />
+          <meshStandardMaterial color="#090a0f" roughness={0.3} metalness={0.2} />
         </mesh>
 
-        {/* Wooden Cabinetry Under the Bench */}
+        {/* Modular Laboratory Cabinetry Under Bench */}
         <mesh position={[0, -1.15, 0]} receiveShadow>
           <boxGeometry args={[9.6, 2.05, 4.1]} />
           <meshStandardMaterial
-            color="#334155"
-            roughness={0.6}
-            metalness={0.15}
+            color="#e2e8f0"
+            roughness={0.4}
+            metalness={0.05}
           />
         </mesh>
 
@@ -38,22 +38,22 @@ export default function LabEnvironment() {
             {/* Top drawer */}
             <mesh position={[0, 0, 0]} receiveShadow>
               <boxGeometry args={[1.45, 0.45, 0.04]} />
-              <meshStandardMaterial color="#1e293b" roughness={0.5} />
+              <meshStandardMaterial color="#f1f5f9" roughness={0.35} />
             </mesh>
-            {/* Metal handle */}
+            {/* Stainless steel handle */}
             <mesh position={[0, 0, 0.04]}>
               <boxGeometry args={[0.4, 0.04, 0.04]} />
-              <meshStandardMaterial color="#94a3b8" metalness={0.9} roughness={0.2} />
+              <meshStandardMaterial color="#cbd5e1" metalness={0.9} roughness={0.15} />
             </mesh>
 
             {/* Bottom double cabinet doors */}
             <mesh position={[0, -0.7, 0]} receiveShadow>
               <boxGeometry args={[1.45, 0.8, 0.04]} />
-              <meshStandardMaterial color="#1e293b" roughness={0.5} />
+              <meshStandardMaterial color="#f1f5f9" roughness={0.35} />
             </mesh>
             <mesh position={[0, -0.7, 0.04]}>
               <boxGeometry args={[0.04, 0.4, 0.04]} />
-              <meshStandardMaterial color="#94a3b8" metalness={0.9} roughness={0.2} />
+              <meshStandardMaterial color="#cbd5e1" metalness={0.9} roughness={0.15} />
             </mesh>
           </group>
         ))}
@@ -92,12 +92,12 @@ export default function LabEnvironment() {
         <group position={[3.8, 0.12, 0]}>
           <mesh receiveShadow>
             <boxGeometry args={[1.5, 0.02, 1.8]} />
-            <meshStandardMaterial color="#0f172a" roughness={0.3} />
+            <meshStandardMaterial color="#334155" roughness={0.3} />
           </mesh>
           {/* Inner sink cavity */}
           <mesh position={[0, -0.15, 0]}>
             <boxGeometry args={[1.3, 0.3, 1.6]} />
-            <meshStandardMaterial color="#334155" metalness={0.7} roughness={0.3} />
+            <meshStandardMaterial color="#64748b" metalness={0.7} roughness={0.3} />
           </mesh>
           {/* Faucet */}
           <mesh position={[0, 0.35, -0.6]}>
@@ -112,40 +112,40 @@ export default function LabEnvironment() {
       <mesh position={[0, -2.18, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
         <planeGeometry args={[30, 26]} />
         <meshStandardMaterial
-          color="#0f172a"
-          roughness={0.4}
-          metalness={0.1}
+          color="#334155"
+          roughness={0.35}
+          metalness={0.08}
         />
       </mesh>
 
-      {/* Back Wall with Modern Lab Paneling */}
+      {/* Back Wall with Modern Bright Lab Paneling */}
       <mesh position={[0, 4, -4.5]} receiveShadow>
         <planeGeometry args={[30, 14]} />
         <meshStandardMaterial
-          color="#1e293b"
-          roughness={0.7}
+          color="#cbd5e1"
+          roughness={0.6}
         />
       </mesh>
 
-      {/* Wall Safety & Periodic Table Backdrop Board */}
+      {/* Wall Safety & Periodic Table Backdrop Board (Whiteboard) */}
       <group position={[0, 3.2, -4.45]}>
-        {/* Frame */}
+        {/* Aluminum Frame */}
         <mesh receiveShadow>
           <boxGeometry args={[6.4, 3.2, 0.08]} />
-          <meshStandardMaterial color="#334155" roughness={0.5} />
+          <meshStandardMaterial color="#94a3b8" metalness={0.85} roughness={0.2} />
         </mesh>
-        {/* Inner Whiteboard / Chart area */}
+        {/* Whiteboard Surface */}
         <mesh position={[0, 0, 0.045]}>
           <planeGeometry args={[6.1, 2.9]} />
-          <meshStandardMaterial color="#090d16" roughness={0.2} metalness={0.1} />
+          <meshStandardMaterial color="#f8fafc" roughness={0.15} metalness={0.05} />
         </mesh>
-        {/* Periodic Table & Lab Header 3D Text */}
+        {/* Periodic Table & Lab Header Marker Text */}
         <Text
           position={[0, 1.1, 0.06]}
           fontSize={0.2}
           maxWidth={5.8}
           textAlign="center"
-          color="#38bdf8"
+          color="#0369a1"
           anchorX="center"
           anchorY="middle"
           fontWeight="bold"
@@ -157,7 +157,7 @@ export default function LabEnvironment() {
           fontSize={0.1}
           maxWidth={5.8}
           textAlign="center"
-          color="#94a3b8"
+          color="#334155"
           anchorX="center"
           anchorY="middle"
         >
@@ -168,18 +168,19 @@ export default function LabEnvironment() {
           fontSize={0.1}
           maxWidth={5.8}
           textAlign="center"
-          color="#34d399"
+          color="#059669"
           anchorX="center"
           anchorY="middle"
+          fontWeight="bold"
         >
-          ACID-BASE NEUTRALIZATION: HCl + NaOH → NaCl + H2O  (DeltaH = -57.1 kJ/mol)
+          ACID-BASE NEUTRALIZATION: HCl + NaOH → NaCl + H2O  (ΔH = -57.1 kJ/mol)
         </Text>
         <Text
           position={[0, -0.3, 0.06]}
           fontSize={0.09}
           maxWidth={5.8}
           textAlign="center"
-          color="#f59e0b"
+          color="#b45309"
           anchorX="center"
           anchorY="middle"
         >
@@ -194,7 +195,7 @@ export default function LabEnvironment() {
           anchorX="center"
           anchorY="middle"
         >
-          VIRTUAL CHEMISTRY SIMULATION ENGINE v2.4 • R3F HIGH-PRECISION GRAPHICS
+          VIRTUAL CHEMISTRY SIMULATION ENGINE v2.4 • PRECISION OPTICAL RIG
         </Text>
       </group>
 
@@ -219,12 +220,12 @@ export default function LabEnvironment() {
           <group key={bi} position={[bx, 0.28, 0]}>
             <mesh castShadow>
               <cylinderGeometry args={[0.14, 0.14, 0.45, 16]} />
-              <meshPhysicalMaterial
+              <meshStandardMaterial
                 color="#b45309"
-                transmission={0.8}
-                roughness={0.15}
-                thickness={0.3}
-                ior={1.5}
+                transparent={true}
+                opacity={0.75}
+                roughness={0.2}
+                metalness={0.1}
               />
             </mesh>
             {/* Cap */}
@@ -240,24 +241,23 @@ export default function LabEnvironment() {
           <group key={fi} position={[fx, 0.32, 0]}>
             {/* Spherical bottom */}
             <mesh position={[0, 0, 0]} castShadow>
-              <sphereGeometry args={[0.22, 24, 24]} />
-              <meshPhysicalMaterial
+              <sphereGeometry args={[0.22, 18, 18]} />
+              <meshStandardMaterial
                 color={fi === 0 ? '#38bdf8' : fi === 1 ? '#a855f7' : '#ec4899'}
-                transmission={0.9}
-                roughness={0.05}
-                thickness={0.2}
-                ior={1.5}
+                transparent={true}
+                opacity={0.8}
+                roughness={0.15}
+                metalness={0.1}
               />
             </mesh>
             {/* Neck */}
             <mesh position={[0, 0.26, 0]} castShadow>
-              <cylinderGeometry args={[0.05, 0.05, 0.35, 16]} />
-              <meshPhysicalMaterial
+              <cylinderGeometry args={[0.05, 0.05, 0.35, 14]} />
+              <meshStandardMaterial
                 color="#ffffff"
-                transmission={0.95}
-                roughness={0.05}
-                thickness={0.2}
-                ior={1.5}
+                transparent={true}
+                opacity={0.7}
+                roughness={0.1}
               />
             </mesh>
             {/* Stopper */}
@@ -273,16 +273,15 @@ export default function LabEnvironment() {
           <group key={ci} position={[cx, 0.4, 0]}>
             <mesh castShadow>
               <cylinderGeometry args={[0.08, 0.08, 0.72, 16]} />
-              <meshPhysicalMaterial
+              <meshStandardMaterial
                 color={ci === 0 ? '#10b981' : '#f59e0b'}
-                transmission={0.88}
-                roughness={0.05}
-                thickness={0.3}
-                ior={1.5}
+                transparent={true}
+                opacity={0.75}
+                roughness={0.15}
               />
             </mesh>
             <mesh position={[0, -0.38, 0]}>
-              <cylinderGeometry args={[0.16, 0.16, 0.04, 16]} />
+              <cylinderGeometry args={[0.16, 0.16, 0.04, 14]} />
               <meshStandardMaterial color="#64748b" />
             </mesh>
           </group>

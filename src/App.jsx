@@ -25,29 +25,44 @@ import {
 import { EXPERIMENTS } from './experiments/experimentList'
 import { soundManager } from './core/SoundEngine'
 
-// Camera controller component to handle smooth animated presets
-function CameraRig({ cameraMode }) {
+// Camera controller component to handle smooth animated presets & touch navigation
+function CameraRig({ cameraMode, isMobile }) {
   const controlsRef = useRef()
 
   useEffect(() => {
     if (!controlsRef.current) return
     if (cameraMode === 'focus') {
       controlsRef.current.target.set(0, 0.4, 0)
-      controlsRef.current.object.position.set(0, 1.2, 3.4)
+      controlsRef.current.object.position.set(0, 1.2, isMobile ? 3.8 : 3.2)
+    } else if (cameraMode === 'shelf') {
+      controlsRef.current.target.set(0, 0.2, -1.2)
+      controlsRef.current.object.position.set(0, 2.2, isMobile ? 5.6 : 4.8)
+    } else if (cameraMode === 'topdown') {
+      controlsRef.current.target.set(0, -0.2, 0)
+      controlsRef.current.object.position.set(0, 5.5, isMobile ? 2.8 : 2.2)
     } else {
+      // overview
       controlsRef.current.target.set(0, 0.3, 0)
-      controlsRef.current.object.position.set(0, 2.5, 6.2)
+      controlsRef.current.object.position.set(0, isMobile ? 3.0 : 2.5, isMobile ? 7.6 : 6.2)
     }
     controlsRef.current.update()
-  }, [cameraMode])
+  }, [cameraMode, isMobile])
 
   return (
     <OrbitControls
       ref={controlsRef}
       target={[0, 0.3, 0]}
-      maxPolarAngle={Math.PI / 2 - 0.05} // Prevent camera from going beneath table
-      minDistance={2.0}
-      maxDistance={9.0}
+      maxPolarAngle={Math.PI / 2 - 0.05} // Prevent camera from dipping below bench
+      minDistance={1.8}
+      maxDistance={9.5}
+      enableDamping={true}
+      dampingFactor={0.06}
+      rotateSpeed={0.7}
+      zoomSpeed={0.8}
+      touches={{
+        ONE: THREE.TOUCH.ROTATE,
+        TWO: THREE.TOUCH.DOLLY_PAN,
+      }}
       makeDefault
     />
   )
@@ -61,7 +76,35 @@ export default function App() {
   const [activePourReagent, setActivePourReagent] = useState(null)
   const [soundMuted, setSoundMuted] = useState(false)
   const [celebrated, setCelebrated] = useState({})
+  const [isMobile, setIsMobile] = useState(
+    typeof window !== 'undefined' ? window.innerWidth <= 768 : false
+  )
+  const [perfMode, setPerfMode] = useState('auto')
   const phStripRef = useRef()
+
+  // Responsive mobile width detector
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768)
+    }
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
+
+  // Unlock Web Audio on first touch/click
+  useEffect(() => {
+    const unlockAudio = () => {
+      soundManager.initContext()
+      window.removeEventListener('pointerdown', unlockAudio)
+      window.removeEventListener('touchstart', unlockAudio)
+    }
+    window.addEventListener('pointerdown', unlockAudio)
+    window.addEventListener('touchstart', unlockAudio)
+    return () => {
+      window.removeEventListener('pointerdown', unlockAudio)
+      window.removeEventListener('touchstart', unlockAudio)
+    }
+  }, [])
 
   // Bottle initial coordinates map for pour animations
   const bottleCoords = {
@@ -83,7 +126,7 @@ export default function App() {
       isHeating: false,
       isStirring: false,
       dropperActive: false,
-      lastAction: `Loaded experiment: ${exp.title}`,
+      lastAction: `Loaded: ${exp.title.split('(')[0].trim()}`,
     }
     baseState.color = calculateSolutionColor(baseState)
     setLabState(baseState)
@@ -107,7 +150,7 @@ export default function App() {
       soundManager.playSuccessChime()
       try {
         confetti({
-          particleCount: 75,
+          particleCount: isMobile ? 40 : 75,
           spread: 70,
           origin: { y: 0.6 },
           colors: ['#ec4899', '#f472b6', '#38bdf8', '#34d399'],
@@ -125,14 +168,14 @@ export default function App() {
       soundManager.playSuccessChime()
       try {
         confetti({
-          particleCount: 70,
+          particleCount: isMobile ? 35 : 70,
           spread: 60,
           origin: { y: 0.6 },
           colors: ['#38bdf8', '#0284c7', '#f59e0b'],
         })
       } catch (e) {}
     }
-  }, [labState.pH, labState.temperature, currentExpId, celebrated, labState.contents.hasPhenol])
+  }, [labState.pH, labState.temperature, currentExpId, celebrated, labState.contents.hasPhenol, isMobile])
 
   // Continuous thermal simulation loop
   useEffect(() => {
@@ -231,58 +274,79 @@ export default function App() {
     ? [-0.7, 0.4, 0]
     : [0, 0, 0]
 
+  // Decide DPR based on mobile & perf setting
+  const effectiveDpr = isMobile
+    ? Math.min(typeof window !== 'undefined' ? window.devicePixelRatio || 1 : 1, 1.5)
+    : [1, 2]
+
   return (
     <div className="lab-viewport-container">
       {/* 3D WebGL Canvas Viewport */}
       <Canvas
-        shadows
-        camera={{ position: [0, 2.5, 6.2], fov: 46 }}
-        gl={{ antialias: true, alpha: false }}
-        style={{ width: '100vw', height: '100vh', background: '#090d16' }}
+        shadows={!isMobile || perfMode !== 'eco'}
+        dpr={effectiveDpr}
+        camera={{
+          position: isMobile ? [0, 3.0, 7.6] : [0, 2.5, 6.2],
+          fov: isMobile ? 52 : 46,
+        }}
+        gl={{
+          antialias: !isMobile,
+          alpha: false,
+          powerPreference: 'high-performance',
+        }}
+        style={{
+          width: '100vw',
+          height: '100vh',
+          background: '#151d2a',
+          touchAction: 'none',
+        }}
       >
-        {/* Laboratory Illumination */}
-        <ambientLight intensity={0.65} color="#e2e8f0" />
+        {/* Realistic Laboratory Illumination */}
+        <ambientLight intensity={0.9} color="#ffffff" />
         <directionalLight
-          position={[5, 9, 6]}
-          intensity={1.2}
-          castShadow
-          shadow-mapSize-width={2048}
-          shadow-mapSize-height={2048}
+          position={[4, 10, 5]}
+          intensity={1.35}
+          castShadow={!isMobile}
+          shadow-mapSize-width={isMobile ? 1024 : 2048}
+          shadow-mapSize-height={isMobile ? 1024 : 2048}
           shadow-bias={-0.0001}
-          color="#f8fafc"
+          color="#ffffff"
         />
-        <directionalLight position={[-6, 6, 2]} intensity={0.4} color="#38bdf8" />
-        <directionalLight position={[0, 4, -4]} intensity={0.3} color="#94a3b8" />
+        <directionalLight position={[-6, 7, 3]} intensity={0.5} color="#e0f2fe" />
+        <directionalLight position={[0, 5, -4]} intensity={0.4} color="#f8fafc" />
 
         {/* --- 3D Scene Objects --- */}
         <LabEnvironment />
 
-        {/* Bunsen Burner with Heating Stand */}
+        {/* Bunsen Burner on Bench */}
         <BunsenBurner
-          position={[-1.8, -1.05, -0.4]}
+          position={[-2.1, -1.075, -0.4]}
           isHeating={labState.isHeating}
           onToggle={handleToggleHeat}
         />
 
-        {/* Main Interactive Glass Reaction Beaker */}
+        {/* Main Interactive Glass Reaction Beaker & Digital Stirrer/Hotplate */}
         <Beaker
-          position={[0, -1.05 + (labState.isHeating ? 1.25 : 0), 0]}
+          position={[0, -0.895, 0]}
           volume={labState.volume}
           maxVolume={labState.maxVolume}
           temperature={labState.temperature}
           liquidColor={labState.color}
+          isHeating={labState.isHeating}
           isStirring={labState.isStirring}
+          isMobile={isMobile}
+          onClick={handleToggleStir}
         />
 
         {/* Glass Stirring Rod in Beaker */}
         <StirringRod
-          position={[0, -1.05 + (labState.isHeating ? 1.25 : 0), 0]}
+          position={[0, -0.895, 0]}
           isStirring={labState.isStirring}
         />
 
         {/* Retort Stand with Digital pH/Temperature Probe dipped in beaker */}
         <DigitalProbe
-          position={[0.9, -1.05, -0.2]}
+          position={[0.68, -1.075, -0.12]}
           pH={labState.pH}
           temperature={labState.temperature}
         />
@@ -291,13 +355,13 @@ export default function App() {
         <PHPaperStrip
           ref={phStripRef}
           position={[1.2, -1.04, 0.9]}
-          beakerPos={[0, -1.05 + (labState.isHeating ? 1.25 : 0), 0]}
+          beakerPos={[0, -0.895, 0]}
           currentPH={labState.pH}
         />
 
         {/* Dropper Pipette hovered above beaker */}
         <PipetteDropper
-          position={[0.8, 0.0, 0.6]}
+          position={[0.8, 0.1, 0.6]}
           liquidColor={labState.color}
           isActive={dropperActive}
         />
@@ -305,7 +369,7 @@ export default function App() {
         {/* Animated Pouring Stream during addition */}
         <AnimatedPourStream
           startPos={pourStart}
-          endPos={[0, -0.6 + (labState.isHeating ? 1.25 : 0), 0]}
+          endPos={[0, 0.35, 0]}
           color={labState.color}
           isPouring={!!activePourReagent}
         />
@@ -409,32 +473,35 @@ export default function App() {
         {/* Soft Contact Shadows on the Workbench */}
         <ContactShadows
           position={[0, -1.04, 0]}
-          opacity={0.7}
+          opacity={isMobile ? 0.5 : 0.7}
           scale={10}
-          blur={1.8}
+          blur={isMobile ? 1.0 : 1.8}
           far={3.0}
         />
 
         {/* Camera Controls & Presets */}
-        <CameraRig cameraMode={cameraMode} />
+        <CameraRig cameraMode={cameraMode} isMobile={isMobile} />
       </Canvas>
 
       {/* Modern High-Tech Glassmorphic Laboratory HUD */}
       <div className="lab-hud-overlay">
         <LabHUD
-
-        labState={labState}
-        onAddReagent={handleAddReagent}
-        onToggleHeat={handleToggleHeat}
-        onToggleStir={handleToggleStir}
-        onTriggerDropper={handleTriggerDropper}
-        onDipPHPaper={handleDipPHPaper}
-        onReset={handleReset}
-        currentExperimentId={currentExpId}
-        onSelectExperiment={loadExperiment}
-        onSetCameraView={setCameraMode}
-        soundMuted={soundMuted}
-        onToggleSound={handleToggleSound}
+          labState={labState}
+          isMobile={isMobile}
+          cameraMode={cameraMode}
+          onAddReagent={handleAddReagent}
+          onToggleHeat={handleToggleHeat}
+          onToggleStir={handleToggleStir}
+          onTriggerDropper={handleTriggerDropper}
+          onDipPHPaper={handleDipPHPaper}
+          onReset={handleReset}
+          currentExperimentId={currentExpId}
+          onSelectExperiment={loadExperiment}
+          onSetCameraView={setCameraMode}
+          soundMuted={soundMuted}
+          onToggleSound={handleToggleSound}
+          perfMode={perfMode}
+          onTogglePerfMode={() => setPerfMode((prev) => (prev === 'high' ? 'eco' : 'high'))}
         />
       </div>
     </div>
