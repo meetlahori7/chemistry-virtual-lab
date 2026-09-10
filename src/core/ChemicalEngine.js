@@ -32,7 +32,7 @@ export const INITIAL_LAB_STATE = {
   },
   
   pH: 7.0,
-  color: 'rgba(224, 242, 254, 0.45)', // subtle clean water
+  color: 'rgba(56, 189, 248, 0.55)', // Crisp, clearly visible aqueous solution
   reactionNotice: 'Solution is neutral distilled water.',
   equation: 'H2O <=> H+ + OH-'
 };
@@ -63,32 +63,32 @@ export function calculateSolutionColor(state) {
   // Copper sulfate deep blue override / blend
   if (contents.cuMoles > 0.001) {
     const intensity = Math.min(1, contents.cuMoles / 0.01);
-    return `rgba(14, 165, 233, ${0.4 + intensity * 0.45})`;
+    return `rgba(2, 132, 199, ${0.75 + intensity * 0.2})`; // Vivid copper cerulean blue
   }
 
   // Phenolphthalein indicator logic (colorless below 8.2, intense magenta above 8.2)
   if (contents.hasPhenol) {
     if (pH >= 8.2) {
-      const alpha = Math.min(0.85, 0.35 + (pH - 8.2) * 0.3);
-      return `rgba(236, 72, 153, ${alpha})`;
+      const alpha = Math.min(0.95, 0.78 + (pH - 8.2) * 0.1);
+      return `rgba(236, 72, 153, ${alpha})`; // Intense brilliant magenta pink
     } else {
-      return 'rgba(224, 242, 254, 0.4)';
+      return 'rgba(56, 189, 248, 0.55)'; // Clean visible aqueous solution
     }
   }
 
   // Universal Indicator RGB spectrum logic
   if (contents.hasUnivInd) {
-    if (pH <= 3) return 'rgba(239, 68, 68, 0.75)'; // Red (Strong Acid)
-    if (pH <= 5) return 'rgba(249, 115, 22, 0.75)'; // Orange (Weak Acid)
-    if (pH <= 6.5) return 'rgba(234, 179, 8, 0.75)'; // Yellow (Slight Acid)
-    if (pH <= 7.5) return 'rgba(34, 197, 94, 0.75)'; // Green (Neutral)
-    if (pH <= 9) return 'rgba(6, 182, 212, 0.75)'; // Cyan/Blue-Green
-    if (pH <= 11) return 'rgba(59, 130, 246, 0.75)'; // Blue (Base)
-    return 'rgba(147, 51, 234, 0.8)'; // Violet (Strong Base)
+    if (pH <= 3) return 'rgba(239, 68, 68, 0.88)'; // Intense Crimson Red (Strong Acid)
+    if (pH <= 5) return 'rgba(249, 115, 22, 0.88)'; // Intense Amber Orange (Weak Acid)
+    if (pH <= 6.5) return 'rgba(234, 179, 8, 0.88)'; // Intense Golden Yellow (Slight Acid)
+    if (pH <= 7.5) return 'rgba(34, 197, 94, 0.88)'; // Intense Emerald Green (Neutral)
+    if (pH <= 9) return 'rgba(6, 182, 212, 0.88)'; // Intense Cyan (Mild Base)
+    if (pH <= 11) return 'rgba(59, 130, 246, 0.88)'; // Intense Royal Blue (Base)
+    return 'rgba(147, 51, 234, 0.92)'; // Intense Deep Purple (Strong Base)
   }
 
-  // Default water/clear solution
-  return 'rgba(224, 242, 254, 0.45)';
+  // Default water/clear solution: visible crystal-clear aqueous blue
+  return 'rgba(56, 189, 248, 0.55)';
 }
 
 // Add a reagent to the current state

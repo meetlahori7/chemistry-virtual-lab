@@ -426,84 +426,95 @@ export default function Beaker({
         {/* ----------------------------------------------------------- */}
         {/* 4. DYNAMIC CHEMICAL SOLUTION (LIQUID BODY & MENISCUS)       */}
         {/* ----------------------------------------------------------- */}
-        {volume > 0 && (
-          <group position={[0, 0, 0]} ref={liquidRef}>
-            {/* Liquid Solution Cylinder */}
-            <mesh
-              position={[0, baseThickness + liquidHeight / 2, 0]}
-              castShadow
-              receiveShadow
-            >
-              <cylinderGeometry
-                args={[innerRadius, innerRadius - 0.01, liquidHeight, 48]}
-              />
-              <meshPhysicalMaterial
-                color={liquidColor}
-                transmission={0.68}
-                roughness={0.04}
-                ior={1.333}
-                transparent={true}
-                opacity={0.88}
-                depthWrite={false}
-              />
-            </mesh>
+        {volume > 0 && (() => {
+          // Parse rgba(...) into hex color and opacity
+          let hexColor = '#38bdf8'
+          let liquidOpacity = 0.78
+          if (liquidColor && liquidColor.startsWith('rgba')) {
+            const match = liquidColor.match(/rgba\s*\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*([\d.]+)\s*\)/)
+            if (match) {
+              const [, r, g, b, a] = match
+              hexColor = '#' + [r, g, b].map((x) => parseInt(x).toString(16).padStart(2, '0')).join('')
+              liquidOpacity = Math.max(0.72, Math.min(0.95, parseFloat(a) || 0.8))
+            }
+          } else if (liquidColor) {
+            hexColor = liquidColor
+          }
 
-            {/* Top Liquid Surface (Flat Center Disc) */}
-            <mesh
-              position={[0, baseThickness + liquidHeight, 0]}
-              rotation={[-Math.PI / 2, 0, 0]}
-            >
-              <circleGeometry args={[innerRadius - 0.01, 48]} />
-              <meshPhysicalMaterial
-                color={liquidColor}
-                transmission={0.72}
-                roughness={0.02}
-                ior={1.333}
-                transparent={true}
-                opacity={0.92}
-                depthWrite={false}
-              />
-            </mesh>
-
-            {/* Concave Meniscus Ring along Glass Wall Perimeter */}
-            <mesh
-              ref={meniscusRef}
-              position={[0, baseThickness + liquidHeight, 0]}
-            >
-              <torusGeometry args={[innerRadius - 0.01, 0.014, 16, 48]} />
-              <meshPhysicalMaterial
-                color={liquidColor}
-                transmission={0.75}
-                roughness={0.03}
-                ior={1.333}
-                transparent={true}
-                opacity={0.95}
-                depthWrite={false}
-              />
-            </mesh>
-
-            {/* PTFE Magnetic Stir Bar ("Flea") at Beaker Bottom */}
-            <group
-              ref={stirBarRef}
-              position={[0, baseThickness + 0.028, 0]}
-              rotation={[0, 0.35, 0]}
-            >
-              <mesh castShadow>
-                <cylinderGeometry args={[0.032, 0.032, 0.22, 16]} rotation={[0, 0, Math.PI / 2]} />
+          return (
+            <group position={[0, 0, 0]} ref={liquidRef}>
+              {/* Liquid Solution Cylinder */}
+              <mesh
+                position={[0, baseThickness + liquidHeight / 2, 0]}
+                castShadow
+                receiveShadow
+              >
+                <cylinderGeometry
+                  args={[innerRadius, innerRadius - 0.01, liquidHeight, 48]}
+                />
                 <meshStandardMaterial
-                  color="#ffffff"
-                  roughness={0.2}
-                  metalness={0.05}
+                  color={hexColor}
+                  transparent={true}
+                  opacity={liquidOpacity}
+                  roughness={0.06}
+                  metalness={0.02}
+                  depthWrite={false}
                 />
               </mesh>
-              {/* Central pivot ring on stir bar */}
-              <mesh rotation={[0, 0, Math.PI / 2]}>
-                <torusGeometry args={[0.034, 0.005, 12, 16]} />
-                <meshStandardMaterial color="#e2e8f0" roughness={0.3} />
+
+              {/* Top Liquid Surface (Flat Center Disc) */}
+              <mesh
+                position={[0, baseThickness + liquidHeight, 0]}
+                rotation={[-Math.PI / 2, 0, 0]}
+              >
+                <circleGeometry args={[innerRadius - 0.005, 48]} />
+                <meshStandardMaterial
+                  color={hexColor}
+                  transparent={true}
+                  opacity={Math.min(1.0, liquidOpacity + 0.12)}
+                  roughness={0.03}
+                  depthWrite={false}
+                />
               </mesh>
+
+              {/* Concave Meniscus Ring along Glass Wall Perimeter */}
+              <mesh
+                ref={meniscusRef}
+                position={[0, baseThickness + liquidHeight, 0]}
+              >
+                <torusGeometry args={[innerRadius - 0.008, 0.016, 16, 48]} />
+                <meshStandardMaterial
+                  color={hexColor}
+                  transparent={true}
+                  opacity={0.95}
+                  roughness={0.04}
+                  depthWrite={false}
+                />
+              </mesh>
+
+              {/* PTFE Magnetic Stir Bar ("Flea") at Beaker Bottom */}
+              <group
+                ref={stirBarRef}
+                position={[0, baseThickness + 0.028, 0]}
+                rotation={[0, 0.35, 0]}
+              >
+                <mesh castShadow>
+                  <cylinderGeometry args={[0.032, 0.032, 0.22, 16]} rotation={[0, 0, Math.PI / 2]} />
+                  <meshStandardMaterial
+                    color="#ffffff"
+                    roughness={0.2}
+                    metalness={0.05}
+                  />
+                </mesh>
+                {/* Central pivot ring on stir bar */}
+                <mesh rotation={[0, 0, Math.PI / 2]}>
+                  <torusGeometry args={[0.034, 0.005, 12, 16]} />
+                  <meshStandardMaterial color="#e2e8f0" roughness={0.3} />
+                </mesh>
+              </group>
             </group>
-          </group>
-        )}
+          )
+        })()}
 
         {/* ----------------------------------------------------------- */}
         {/* 5. PROCEDURAL CONVECTIVE BOILING BUBBLES                     */}
